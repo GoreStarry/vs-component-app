@@ -39,7 +39,7 @@ function getConfig(path) {
             ConfigPick.includeCosmos = true
           }
 
-          if(connected==='Connect'){
+          if(connected==='Connected'){
             ConfigPick.connected = true
           }
           const config = Object.assign({ path, name }, defaultConfig, ccarc, ConfigPick);
