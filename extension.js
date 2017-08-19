@@ -27,14 +27,24 @@ function getConfig(path) {
         reject("Name is undefined");
       }
       vscode.window.showQuickPick(UXtoolSelections).then(UXtool=>{
-        let ConfigUX = {};
-        if(UXtool==='Storybooks'){
-          ConfigUX.includeStories = true
-        }else if(UXtool==='Cosmos'){
-          ConfigUX.includeCosmos = true
+        if (!UXtool) {
+          reject("UXtool is undefined");
         }
-        const config = Object.assign({ path, name }, defaultConfig, ccarc, ConfigUX);
-        resolve(config);
+        vscode.window.showQuickPick(['Not Connected','Connected']).then(connected=>{
+          let ConfigPick = {};
+
+          if(UXtool==='Storybooks'){
+            ConfigPick.includeStories = true
+          }else if(UXtool==='Cosmos'){
+            ConfigPick.includeCosmos = true
+          }
+
+          if(connected==='Connect'){
+            ConfigPick.connected = true
+          }
+          const config = Object.assign({ path, name }, defaultConfig, ccarc, ConfigPick);
+          resolve(config);
+        })
       })
     });
   });
