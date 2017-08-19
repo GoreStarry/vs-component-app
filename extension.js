@@ -6,10 +6,13 @@ const defaultConfig = {
   cssExtension: "css",
   includeTests: false,
   includeStories: false,
+  includeCosmos: false,
   indexFile: false,
   connected: false,
   componentMethods: []
 };
+
+const UXtoolSelections= ['no UX tools','Cosmos','Storybooks'];
 
 /**
  * Get the config options from settings preference and merge with the default options.
@@ -23,8 +26,16 @@ function getConfig(path) {
       if (!name) {
         reject("Name is undefined");
       }
-      const config = Object.assign({ path, name }, defaultConfig, ccarc);
-      resolve(config);
+      vscode.window.showQuickPick(UXtoolSelections).then(UXtool=>{
+        let ConfigUX = {};
+        if(UXtool==='Storybooks'){
+          ConfigUX.includeStories = true
+        }else if(UXtool==='Cosmos'){
+          ConfigUX.includeCosmos = true
+        }
+        const config = Object.assign({ path, name }, defaultConfig, ccarc, ConfigUX);
+        resolve(config);
+      })
     });
   });
 }
