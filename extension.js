@@ -4,15 +4,16 @@ const defaultConfig = {
   type: "class",
   jsExtension: "js",
   cssExtension: "css",
+  cssModule: true,
   includeTests: false,
   includeStories: false,
   includeCosmos: false,
   indexFile: false,
   connected: false,
-  componentMethods: []
+  componentMethods: [],
 };
 
-const UXtoolSelections= ['no UX tools','Cosmos','Storybooks'];
+const UXtoolSelections = ["no UX tools", "Cosmos", "Storybooks"];
 
 /**
  * Get the config options from settings preference and merge with the default options.
@@ -26,26 +27,54 @@ function getConfig(path) {
       if (!name) {
         reject("Name is undefined");
       }
-      vscode.window.showQuickPick(UXtoolSelections).then(UXtool=>{
-        if (!UXtool) {
-          reject("UXtool is undefined");
-        }
-        vscode.window.showQuickPick(['Not Connected','Connected']).then(connected=>{
-          let ConfigPick = {};
 
-          if(UXtool==='Storybooks'){
-            ConfigPick.includeStories = true
-          }else if(UXtool==='Cosmos'){
-            ConfigPick.includeCosmos = true
-          }
+      vscode.window
+        .showQuickPick(["CSS module", "No CSS module"])
+        .then(cssModule => {
+          vscode.window.showQuickPick(UXtoolSelections).then(UXtool => {
+            if (!UXtool) {
+              reject("UXtool is undefined");
+            }
 
-          if(connected==='Connected'){
-            ConfigPick.connected = true
-          }
-          const config = Object.assign({ path, name }, defaultConfig, ccarc, ConfigPick);
-          resolve(config);
-        })
-      })
+            vscode.window
+              .showQuickPick(["No locale file", "add locale"])
+              .then(locale => {
+                if (!locale) {
+                  reject("locale is undefined");
+                }
+                vscode.window
+                  .showQuickPick(["Not Connected", "Connected"])
+                  .then(connected => {
+                    let ConfigPick = {};
+
+                    if (cssModule === "No CSS module") {
+                      ConfigPick.cssModule = false;
+                    }
+
+                    if (UXtool === "Storybooks") {
+                      ConfigPick.includeStories = true;
+                    } else if (UXtool === "Cosmos") {
+                      ConfigPick.includeCosmos = true;
+                    }
+
+                    if (connected === "Connected") {
+                      ConfigPick.connected = true;
+                    }
+
+                    if (locale === "add locale") {
+                      ConfigPick.includeLocale = true;
+                    }
+                    const config = Object.assign(
+                      { path, name },
+                      defaultConfig,
+                      ccarc,
+                      ConfigPick
+                    );
+                    resolve(config);
+                  });
+              });
+          });
+        });
     });
   });
 }
