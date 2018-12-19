@@ -20,62 +20,57 @@ const UXtoolSelections = ["no UX tools", "Cosmos", "Storybooks"];
  * @param {string} path of destination.
  */
 function getConfig(path) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const { ccarc } = vscode.workspace.getConfiguration();
 
-    vscode.window.showInputBox({ value: "ComponentName" }).then(name => {
+    try {
+      const name = await vscode.window.showInputBox({
+        value: "ComponentName",
+      });
+
       if (!name) {
         reject("Name is undefined");
       }
 
-      vscode.window
-        .showQuickPick(["CSS module", "No CSS module"])
-        .then(cssModule => {
-          vscode.window.showQuickPick(UXtoolSelections).then(UXtool => {
-            if (!UXtool) {
-              reject("UXtool is undefined");
-            }
+      const cssModule = await vscode.window.showQuickPick([
+        "CSS module",
+        "Not CSS module",
+        "No Style",
+      ]);
 
-            vscode.window
-              .showQuickPick(["No locale file", "add locale"])
-              .then(locale => {
-                if (!locale) {
-                  reject("locale is undefined");
-                }
-                vscode.window
-                  .showQuickPick(["Not Connected", "Connected"])
-                  .then(connected => {
-                    let ConfigPick = {};
+      const uxTool = await vscode.window.showQuickPick([
+        "no UX tools",
+        "Cosmos",
+        "Storybooks",
+      ]);
 
-                    if (cssModule === "No CSS module") {
-                      ConfigPick.cssModule = false;
-                    }
+      // const locale = await vscode.window.showQuickPick([
+      //   "No locale file",
+      //   "add locale",
+      // ]);
 
-                    if (UXtool === "Storybooks") {
-                      ConfigPick.includeStories = true;
-                    } else if (UXtool === "Cosmos") {
-                      ConfigPick.includeCosmos = true;
-                    }
+      const redux_connected = await vscode.window.showQuickPick([
+        "Not Connected",
+        "Connected",
+      ]);
 
-                    if (connected === "Connected") {
-                      ConfigPick.connected = true;
-                    }
+      const test = await vscode.window.showQuickPick(["No Test", "Test File"]);
 
-                    if (locale === "add locale") {
-                      ConfigPick.includeLocale = true;
-                    }
-                    const config = Object.assign(
-                      { path, name },
-                      defaultConfig,
-                      ccarc,
-                      ConfigPick
-                    );
-                    resolve(config);
-                  });
-              });
-          });
-        });
-    });
+      const config = Object.assign({ path, name }, defaultConfig, ccarc, {
+        cssExtension:
+          cssModule === "No Style"
+            ? false
+            : ccarc.cssExtension || defaultConfig.cssExtension,
+        cssModule: cssModule === "CSS module",
+        includeTests: test === "Test File",
+        includeStories: uxTool === "Storybooks",
+        includeCosmos: uxTool === "Cosmos",
+        connected: redux_connected,
+      });
+      resolve(config);
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 
