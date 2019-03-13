@@ -65,7 +65,7 @@ function getConfig(path) {
         includeTests: test === "Test File",
         includeStories: uxTool === "Storybooks",
         includeCosmos: uxTool === "Cosmos",
-        connected: redux_connected,
+        connected: redux_connected === "Connected",
       });
       resolve(config);
     } catch (error) {
